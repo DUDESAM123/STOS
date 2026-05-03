@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web OS - Stranger Things Prototype</title>
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Fonts: Inter for UI, VT323 for terminal, Permanent Marker for Focus Board -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="hawking overflow-hidden font-sans text-white h-screen w-screen relative">
+    
+    <!-- Audio for Intro -->
+    <!-- Note: Using a placeholder URL. You can replace this with a local file like "assets/theme.mp3" -->
+    <audio id="intro-music" src="https://actions.google.com/sounds/v1/science_fiction/epic_suspense.ogg" preload="auto"></audio>
+
+    <!-- Initial "Click to Start" Overlay for Audio Policy -->
+    <div id="start-overlay" class="absolute inset-0 bg-black z-[20000] flex items-center justify-center cursor-pointer">
+        <p class="text-red-600 font-mono text-xl animate-pulse tracking-widest text-center px-4">CLICK TO INITIATE SEQUENCE</p>
+    </div>
+
+    <!-- Intro Boot Sequence -->
+    <div id="intro-screen" class="hidden absolute inset-0 bg-black z-[10000] flex flex-col items-center justify-center overflow-hidden">
+        <!-- Stranger Things Intro Text Animation -->
+        <div class="intro-title-container relative text-center">
+            <h1 class="intro-title uppercase text-transparent text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-red-600 border-y-2 border-red-600/80 py-4" style="-webkit-text-stroke: 1.5px #ff0000;">
+                Stranger Things
+            </h1>
+            <h2 class="intro-subtitle uppercase tracking-[1em] text-red-500 mt-6 text-lg md:text-xl lg:text-2xl opacity-0">
+                Web Operating System
+            </h2>
+        </div>
+    </div>
+
+    <!-- Background layers for smooth 1s transition via CSS opacity -->
+    <div id="bg-hawking" class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out opacity-100 z-[-2]"></div>
+    <div id="bg-upside-down" class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out opacity-0 z-[-1] pointer-events-none"></div>
+
+    <!-- VHS Scanline Overlay -->
+    <div id="vhs-overlay" class="absolute inset-0 pointer-events-none z-[9999] opacity-10 mix-blend-overlay"></div>
+
+    <!-- Hidden Audio Element for Synth Swell (as requested) -->
+    <audio id="synth-swell" src="https://actions.google.com/sounds/v1/science_fiction/alien_breath.ogg" preload="auto"></audio>
+
+    <!-- Taskbar / Navigation Panel -->
+    <div class="absolute bottom-0 w-full h-16 glass-panel flex items-center px-6 justify-between z-[1000] border-t border-white/20">
+        <!-- The "Gate" Toggle Button -->
+        <button id="gate-toggle" class="px-6 py-2 rounded-md font-bold tracking-wider uppercase transition-all duration-1000 bg-orange-500/20 hover:bg-orange-500/40 border border-orange-500/50 text-orange-200 shadow-[0_0_10px_rgba(249,115,22,0.3)] gate-btn glitch-icon">
+            Open The Gate
+        </button>
+        
+        <!-- App Launcher Buttons -->
+        <div class="flex gap-4">
+            <button onclick="openWindow('ai-tutor')" class="px-4 py-2 rounded glass-btn hover:bg-white/10 transition-colors border border-white/10 glitch-icon">📻 Cerebro</button>
+            <button onclick="openWindow('focus-board')" class="px-4 py-2 rounded glass-btn hover:bg-white/10 transition-colors border border-white/10 glitch-icon">🎲 Focus Board</button>
+        </div>
+        
+        <!-- System Clock -->
+        <div id="clock" class="font-mono text-xl tracking-widest text-orange-200 clock-text glitch-target" data-text="12:00 PM">12:00 PM</div>
+    </div>
+
+    <!-- Main Desktop Workspace -->
+    <div id="desktop" class="relative w-full h-[calc(100vh-4rem)] p-8">
+        
+        <!-- Desktop Icons -->
+        <div class="absolute top-8 left-8 flex flex-col gap-6 z-10">
+            <div class="flex flex-col items-center cursor-pointer group w-20" onclick="openWindow('timer-app')">
+                <div class="w-14 h-14 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm shadow-lg">
+                    <span class="text-3xl">⏱️</span>
+                </div>
+                <span class="mt-2 text-xs font-semibold tracking-wide text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] text-center">Timer</span>
+            </div>
+            
+            <div class="flex flex-col items-center cursor-pointer group w-20" onclick="openWindow('files-app')">
+                <div class="w-14 h-14 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm shadow-lg">
+                    <span class="text-3xl">📁</span>
+                </div>
+                <span class="mt-2 text-xs font-semibold tracking-wide text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] text-center">Files</span>
+            </div>
+            
+            <div class="flex flex-col items-center cursor-pointer group w-20" onclick="openWindow('walkie-talkie-app')">
+                <div class="w-14 h-14 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm shadow-lg">
+                    <span class="text-3xl">📻</span>
+                </div>
+                <span class="mt-2 text-xs font-semibold tracking-wide text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] text-center">Walkie Talkie</span>
+            </div>
+            
+            <div class="flex flex-col items-center cursor-pointer group w-20" onclick="openWindow('gallery-app')">
+                <div class="w-14 h-14 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm shadow-lg">
+                    <span class="text-3xl">🖼️</span>
+                </div>
+                <span class="mt-2 text-xs font-semibold tracking-wide text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] text-center">Gallery</span>
+            </div>
+            
+            <div class="flex flex-col items-center cursor-pointer group w-20" onclick="openWindow('calculator-app')">
+                <div class="w-14 h-14 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm shadow-lg">
+                    <span class="text-3xl">🧮</span>
+                </div>
+                <span class="mt-2 text-xs font-semibold tracking-wide text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] text-center">Calc</span>
+            </div>
+        </div>
+        
+        <!-- 1. AI Tutor (Cerebro) Window -->
+        <div id="ai-tutor" class="window hidden absolute top-10 left-10 w-96 rounded-lg glass-window shadow-2xl border border-white/10 flex-col overflow-hidden">
+            <!-- Draggable Header -->
+            <div class="window-header bg-black/40 px-4 py-2 flex justify-between items-center cursor-grab border-b border-white/10">
+                <span class="window-title font-mono tracking-widest text-green-400 text-sm glitch-target" data-text="CEREBRO_LINK_ACTIVE">CEREBRO_LINK_ACTIVE</span>
+                <button onclick="closeWindow('ai-tutor')" class="text-white/50 hover:text-white transition-colors">✕</button>
+            </div>
+            <!-- Window Content -->
+            <div class="window-content p-4 bg-black/80 h-64 flex flex-col">
+                <div id="terminal-output" class="flex-1 overflow-y-auto font-mono text-green-500 text-lg glow-text-green break-words whitespace-pre-wrap">
+                    > connection established...<br>
+                </div>
+                <div class="mt-2 flex border-t border-green-500/30 pt-2">
+                    <span class="font-mono text-green-500 mr-2">></span>
+                    <input type="text" id="terminal-input" class="flex-1 bg-transparent border-none outline-none font-mono text-green-400" autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Focus Board Window -->
+        <div id="focus-board" class="window hidden absolute top-20 right-20 w-[550px] rounded-lg corkboard shadow-[0_10px_30px_rgba(0,0,0,0.5)] border-8 border-yellow-900/80 flex-col overflow-hidden">
+            <!-- Draggable Header -->
+            <div class="window-header bg-yellow-950/80 px-4 py-2 flex justify-between items-center cursor-grab border-b border-yellow-900/50">
+                <span class="window-title font-['Permanent_Marker'] tracking-wider text-yellow-100 text-xl glitch-target" data-text="Campaign Notes">Campaign Notes</span>
+                <button onclick="closeWindow('focus-board')" class="text-white/50 hover:text-white transition-colors">✕</button>
+            </div>
+            <!-- Window Content: Corkboard Area -->
+            <div class="window-content p-8 h-96 relative flex flex-wrap gap-4 bg-yellow-800/40">
+                
+                <!-- Polaroid Photo -->
+                <div class="polaroid absolute top-4 left-6 transform -rotate-6 bg-white p-2 pb-8 shadow-lg text-center">
+                    <div class="w-32 h-32 bg-gray-300 border border-gray-400 flex items-center justify-center overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=200&h=200&fit=crop" class="opacity-50 grayscale" alt="Woods">
+                    </div>
+                    <p class="font-['Permanent_Marker'] text-black text-center mt-2 text-sm">Where is Will?</p>
+                </div>
+                
+                <!-- D&D Character Note -->
+                <div class="note absolute top-8 right-10 transform rotate-3 bg-yellow-100/90 text-black p-4 w-56 shadow-md border border-yellow-200">
+                    <h3 class="font-bold border-b border-black mb-2 uppercase text-sm font-['Permanent_Marker']">Target: Demogorgon</h3>
+                    <ul class="text-sm space-y-1 list-disc pl-4 font-mono">
+                        <li>HP: Unknown</li>
+                        <li>AC: 18 (Natural Armor)</li>
+                        <li>Weakness: FIRE</li>
+                    </ul>
+                </div>
+                
+                <!-- Pink Sticky Note -->
+                <div class="sticky-note absolute bottom-10 left-20 transform -rotate-3 bg-pink-300/90 text-black p-3 w-40 shadow-md">
+                    <p class="font-['Permanent_Marker'] text-sm">Don't forget the Eggos!!<br>- El</p>
+                </div>
+
+                <!-- Pushpins (decorative) -->
+                <div class="absolute top-2 left-20 w-3 h-3 rounded-full bg-red-600 shadow-sm border border-red-800"></div>
+                <div class="absolute top-6 right-36 w-3 h-3 rounded-full bg-blue-600 shadow-sm border border-blue-800"></div>
+            </div>
+        </div>
+
+        <!-- 3. Timer Window -->
+        <div id="timer-app" class="window hidden absolute top-40 left-[400px] w-80 rounded-lg glass-window shadow-2xl border border-white/10 flex-col overflow-hidden">
+            <div class="window-header bg-black/40 px-4 py-2 flex justify-between items-center cursor-grab border-b border-white/10">
+                <span class="window-title font-mono tracking-widest text-red-400 text-sm glitch-target" data-text="COUNTDOWN">COUNTDOWN</span>
+                <button onclick="closeWindow('timer-app')" class="text-white/50 hover:text-white transition-colors">✕</button>
+            </div>
+            <div class="window-content p-6 bg-black/80 flex flex-col items-center justify-center h-48">
+                <div id="timer-display" class="font-mono text-5xl text-red-500 mb-6 glow-text-red tracking-widest">00:00</div>
+                <div class="flex gap-4">
+                    <button id="start-timer" class="px-6 py-2 bg-red-900/50 text-red-200 border border-red-500/50 rounded hover:bg-red-800/50 font-mono transition-colors shadow-[0_0_10px_rgba(239,68,68,0.2)] hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]">START</button>
+                    <button id="reset-timer" class="px-6 py-2 bg-gray-800 text-gray-300 border border-gray-600 rounded hover:bg-gray-700 font-mono transition-colors">RESET</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Files Window -->
+        <div id="files-app" class="window hidden absolute top-20 left-1/3 w-[500px] rounded-lg glass-window shadow-2xl border border-white/10 flex-col overflow-hidden">
+            <div class="window-header bg-blue-900/40 px-4 py-2 flex justify-between items-center cursor-grab border-b border-white/10">
+                <span class="window-title font-mono tracking-widest text-blue-300 text-sm glitch-target" data-text="HAWKINS_OS_FILES">HAWKINS_OS_FILES</span>
+                <button onclick="closeWindow('files-app')" class="text-white/50 hover:text-white transition-colors">✕</button>
+            </div>
+            <div class="window-content p-0 bg-black/90 h-80 flex flex-col font-mono text-sm text-blue-400">
+                <div class="p-3 border-b border-blue-500/30 flex justify-between bg-blue-950/50">
+                    <span class="text-blue-300">C:\HAWKINS\LAB\FILES></span>
+                </div>
+                <div class="flex-1 p-4 overflow-y-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-blue-800/50">
+                                <th class="pb-2 font-normal text-blue-500">Name</th>
+                                <th class="pb-2 font-normal text-blue-500">Size</th>
+                                <th class="pb-2 font-normal text-blue-500">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-blue-300">
+                            <tr class="hover:bg-blue-900/40 cursor-pointer transition-colors border-b border-blue-900/20">
+                                <td class="py-3">PROJECT_NINA.txt</td>
+                                <td>14 KB</td>
+                                <td>FILE</td>
+                            </tr>
+                            <tr class="hover:bg-blue-900/40 cursor-pointer transition-colors border-b border-blue-900/20">
+                                <td class="py-3">subjects_list.dat</td>
+                                <td>89 KB</td>
+                                <td>DAT</td>
+                            </tr>
+                            <tr class="hover:bg-blue-900/40 cursor-pointer text-yellow-400 transition-colors border-b border-blue-900/20">
+                                <td class="py-3" style="text-shadow: 0 0 5px rgba(250, 204, 21, 0.6);">GATE_CONTROLS.exe</td>
+                                <td>1.2 MB</td>
+                                <td>SYSTEM</td>
+                            </tr>
+                            <tr class="hover:bg-blue-900/40 cursor-pointer transition-colors">
+                                <td class="py-3">MAP_UPSIDEDOWN.img</td>
+                                <td>4.5 MB</td>
+                                <td>IMG</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-2 px-4 bg-blue-900/20 border-t border-blue-500/30 text-xs text-blue-500">
+                    4 File(s) 5,813 KB total
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Walkie Talkie Window -->
+        <div id="walkie-talkie-app" class="window hidden absolute top-[15%] right-[30%] w-64 rounded-[2rem] bg-zinc-800 shadow-[20px_20px_60px_rgba(0,0,0,0.8),inset_2px_2px_10px_rgba(255,255,255,0.1)] border border-zinc-700 flex-col items-center p-4 pt-10">
+            <!-- Antenna -->
+            <div class="absolute -top-24 left-8 w-4 h-28 bg-zinc-900 border-2 border-zinc-700 rounded-t-full z-[-1] shadow-lg"></div>
+            <!-- Volume Knob -->
+            <div class="absolute -top-4 right-10 w-12 h-6 bg-zinc-900 border-2 border-zinc-700 rounded-t-lg z-[-1]"></div>
+            
+            <div class="window-header absolute top-0 left-0 w-full px-4 py-2 flex justify-between items-center cursor-grab z-10 rounded-t-[2rem]">
+                <span class="window-title font-mono tracking-widest text-zinc-400 text-[10px] uppercase glitch-target" data-text="TRC-214">TRC-214</span>
+                <button onclick="closeWindow('walkie-talkie-app')" class="text-white/30 hover:text-red-500 transition-colors bg-black/20 hover:bg-black/40 rounded-full w-5 h-5 flex items-center justify-center text-xs">✕</button>
+            </div>
+            
+            <div class="w-full flex flex-col items-center z-10 window-content">
+                <!-- Speaker Grille -->
+                <div class="w-full h-32 bg-zinc-900/80 rounded-2xl border-2 border-zinc-950 p-2 mb-6 speaker-grille shadow-inner"></div>
+                
+                <!-- Channel Display -->
+                <div class="w-24 h-12 bg-black rounded-lg border-2 border-zinc-950 flex justify-center items-center mb-6 shadow-inner relative overflow-hidden">
+                    <div class="absolute inset-0 bg-red-500/5 mix-blend-overlay"></div>
+                    <div id="walkie-channel" class="font-mono text-3xl text-red-500 glow-text-red tracking-wider font-bold">11</div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="flex gap-4 w-full justify-between items-end px-2 pb-2">
+                    <button id="channel-down" class="w-12 h-10 rounded-xl bg-zinc-700 border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 text-white font-bold flex justify-center items-center text-xl shadow-md">-</button>
+                    
+                    <!-- PTT Button -->
+                    <button id="ptt-btn" class="w-16 h-20 rounded-xl bg-orange-600 border-b-8 border-orange-800 active:border-b-0 active:translate-y-2 text-white font-bold flex flex-col justify-center items-center shadow-[0_5px_15px_rgba(234,88,12,0.4)] transition-all">
+                        <span class="text-[10px] tracking-widest opacity-80 mb-1">PUSH</span>
+                        <span class="text-xs tracking-widest">TALK</span>
+                    </button>
+                    
+                    <button id="channel-up" class="w-12 h-10 rounded-xl bg-zinc-700 border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 text-white font-bold flex justify-center items-center text-xl shadow-md">+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Gallery Window -->
+        <div id="gallery-app" class="window hidden absolute top-10 left-1/2 -translate-x-1/2 w-[90%] max-w-[800px] rounded-lg glass-window shadow-2xl border border-white/10 flex-col overflow-hidden">
+            <div class="window-header bg-red-950/80 px-4 py-3 flex justify-between items-center cursor-grab border-b border-red-900">
+                <span class="window-title font-mono tracking-widest text-red-500 text-sm font-bold glitch-target" data-text="HAWKINS_ARCHIVE_IMAGES">HAWKINS_ARCHIVE_IMAGES</span>
+                <button onclick="closeWindow('gallery-app')" class="text-white/50 hover:text-red-500 transition-colors">✕</button>
+            </div>
+            <div class="window-content p-6 bg-black/95 flex flex-col font-mono overflow-y-auto max-h-[600px]">
+                <h2 class="text-red-600 text-2xl font-bold mb-6 border-b border-red-900/50 pb-2 glow-text-red">CLASSIFIED: SUBJECT VECNA</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Image 1 -->
+                    <div class="flex flex-col items-center group">
+                        <div class="w-full h-48 rounded-md overflow-hidden border-2 border-red-900/30 group-hover:border-red-600 transition-colors shadow-[0_0_15px_rgba(220,38,38,0.1)] group-hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+                            <img src="assets/vecna1.png" alt="Vecna Sighting 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 filter grayscale-[20%] group-hover:grayscale-0">
+                        </div>
+                        <span class="mt-3 text-red-500 text-xs tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">VECNA_001.PNG</span>
+                    </div>
+                    <!-- Image 2 -->
+                    <div class="flex flex-col items-center group">
+                        <div class="w-full h-48 rounded-md overflow-hidden border-2 border-red-900/30 group-hover:border-red-600 transition-colors shadow-[0_0_15px_rgba(220,38,38,0.1)] group-hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+                            <img src="assets/vecna2.png" alt="Vecna Sighting 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 filter grayscale-[20%] group-hover:grayscale-0">
+                        </div>
+                        <span class="mt-3 text-red-500 text-xs tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">VECNA_002.PNG</span>
+                    </div>
+                    <!-- Image 3 -->
+                    <div class="flex flex-col items-center group">
+                        <div class="w-full h-48 rounded-md overflow-hidden border-2 border-red-900/30 group-hover:border-red-600 transition-colors shadow-[0_0_15px_rgba(220,38,38,0.1)] group-hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+                            <img src="assets/vecna3.png" alt="Vecna Sighting 3" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 filter grayscale-[20%] group-hover:grayscale-0">
+                        </div>
+                        <span class="mt-3 text-red-500 text-xs tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">VECNA_003.PNG</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 7. Calculator Window -->
+        <div id="calculator-app" class="window hidden absolute top-1/4 left-[40%] w-72 rounded-lg glass-window shadow-2xl border border-white/10 flex-col overflow-hidden">
+            <div class="window-header bg-black/40 px-4 py-2 flex justify-between items-center cursor-grab border-b border-white/10">
+                <span class="window-title font-mono tracking-widest text-cyan-400 text-sm glitch-target" data-text="CALCULATOR">CALCULATOR</span>
+                <button onclick="closeWindow('calculator-app')" class="text-white/50 hover:text-white transition-colors">✕</button>
+            </div>
+            <div class="window-content p-4 bg-black/80 flex flex-col items-center">
+                <div class="w-full bg-cyan-950/50 border border-cyan-800/50 rounded p-3 mb-4 shadow-inner">
+                    <div id="calc-display" class="font-mono text-right text-3xl text-cyan-400 glow-text-cyan h-9 flex items-center justify-end overflow-hidden">0</div>
+                </div>
+                <div class="grid grid-cols-4 gap-2 w-full font-mono text-lg">
+                    <button class="calc-btn col-span-2 bg-gray-800 hover:bg-gray-700 text-gray-300 py-3 rounded transition-colors shadow-md" onclick="calcAction('clear')">AC</button>
+                    <button class="calc-btn bg-gray-800 hover:bg-gray-700 text-gray-300 py-3 rounded transition-colors shadow-md" onclick="calcAction('delete')">DEL</button>
+                    <button class="calc-btn bg-cyan-900/80 hover:bg-cyan-800/80 text-cyan-200 py-3 rounded transition-colors shadow-md" onclick="calcAction('operator', '/')">÷</button>
+                    
+                    <button class="calc-btn bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '7')">7</button>
+                    <button class="calc-btn bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '8')">8</button>
+                    <button class="calc-btn bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '9')">9</button>
+                    <button class="calc-btn bg-cyan-900/80 hover:bg-cyan-800/80 text-cyan-200 py-3 rounded transition-colors shadow-md" onclick="calcAction('operator', '*')">×</button>
+                    
+                    <button class="calc-btn bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '4')">4</button>
+                    <button class="calc-btn bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '5')">5</button>
+                    <button class="calc-btn bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '6')">6</button>
+                    <button class="calc-btn bg-cyan-900/80 hover:bg-cyan-800/80 text-cyan-200 py-3 rounded transition-colors shadow-md" onclick="calcAction('operator', '-')">−</button>
+                    
+                    <button class="calc-btn bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '1')">1</button>
+                    <button class="calc-btn bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '2')">2</button>
+                    <button class="calc-btn bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '3')">3</button>
+                    <button class="calc-btn bg-cyan-900/80 hover:bg-cyan-800/80 text-cyan-200 py-3 rounded transition-colors shadow-md" onclick="calcAction('operator', '+')">+</button>
+                    
+                    <button class="calc-btn col-span-2 bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '0')">0</button>
+                    <button class="calc-btn bg-black/60 hover:bg-white/10 text-white border border-white/10 py-3 rounded transition-colors shadow-md" onclick="calcAction('number', '.')">.</button>
+                    <button class="calc-btn bg-orange-600/80 hover:bg-orange-500/80 text-white py-3 rounded transition-colors font-bold shadow-[0_0_15px_rgba(234,88,12,0.5)] hover:shadow-[0_0_20px_rgba(234,88,12,0.8)]" onclick="calcAction('equals')">=</button>
+                </div>
+            </div>
+        </div>
+    </div> <!-- Close #desktop div -->
+
+    <!-- Application Logic -->
+    <script src="script.js"></script>
+</body>
+</html>

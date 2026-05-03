@@ -1,0 +1,226 @@
+:root {
+    /* "Hawking" Side Theme Variables */
+    --hawking-bg: url('assets/hawkins_hq.png');
+    /* "Upside Down" Side Theme Variables */
+    --upside-down-bg: url('assets/upside_down_vecna.png');
+    
+    --glass-bg: rgba(20, 10, 10, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Background Layers for Smooth Transitions */
+#bg-hawking {
+    background-image: var(--hawking-bg);
+}
+
+#bg-upside-down {
+    background-image: var(--upside-down-bg);
+    /* Upside Down specific filters applied to background layer */
+    filter: grayscale(0.5) contrast(1.2) sepia(0.2) hue-rotate(-20deg); 
+}
+
+/* The 1s CSS Transition for Background Fading */
+body.upside-down #bg-hawking {
+    opacity: 0;
+}
+
+body.upside-down #bg-upside-down {
+    opacity: 1;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-window {
+    background: rgba(15, 15, 20, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+/* Upside Down Button Theming */
+body.upside-down .gate-btn {
+    background-color: rgba(220, 38, 38, 0.2);
+    border-color: rgba(220, 38, 38, 0.6);
+    color: #fca5a5;
+    text-shadow: 0 0 10px rgba(220, 38, 38, 0.8);
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
+}
+
+body.upside-down .clock-text {
+    color: #fca5a5;
+    text-shadow: 0 0 8px rgba(220, 38, 38, 0.8);
+}
+
+/* --- Glitch Animations for Upside Down --- */
+@keyframes glitch-anim {
+    0% { transform: translate(0) }
+    20% { transform: translate(-2px, 2px) }
+    40% { transform: translate(-2px, -2px) }
+    60% { transform: translate(2px, 2px) }
+    80% { transform: translate(2px, -2px) }
+    100% { transform: translate(0) }
+}
+
+body.upside-down .glitch-target {
+    animation: glitch-anim 0.3s infinite;
+    position: relative;
+    color: #ffbaba; /* Slightly redder text in upside down */
+}
+
+/* Pseudo-elements to create the chromatic aberration glitch effect */
+body.upside-down .glitch-target::before,
+body.upside-down .glitch-target::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+}
+
+body.upside-down .glitch-target::before {
+    left: 2px;
+    text-shadow: -1px 0 red;
+    clip: rect(10px, 550px, 30px, 0);
+    animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+
+body.upside-down .glitch-target::after {
+    left: -2px;
+    text-shadow: -1px 0 blue;
+    clip: rect(5px, 550px, 20px, 0);
+    animation: glitch-anim 2.5s infinite linear alternate-reverse;
+}
+
+body.upside-down .glitch-icon {
+    animation: glitch-anim 0.5s infinite;
+}
+
+/* --- Terminal / Typewriter Utilities --- */
+.glow-text-green {
+    text-shadow: 0 0 5px rgba(34, 197, 94, 0.6), 0 0 10px rgba(34, 197, 94, 0.4);
+    font-family: 'VT323', monospace;
+}
+
+/* Glowing cursor block */
+.typewriter-cursor::after {
+    content: '█';
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* --- Focus Board Utilities --- */
+/* Corkboard repeating background pattern */
+.corkboard {
+    background-color: #8b5a2b;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' fill='%23a06a38'/%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.25'/%3E%3C/svg%3E");
+}
+
+.polaroid, .note, .sticky-note {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.polaroid:hover, .note:hover, .sticky-note:hover {
+    transform: rotate(0deg) scale(1.05) !important;
+    z-index: 10;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+}
+
+/* --- Global VHS overlay effects --- */
+#vhs-overlay {
+    background: repeating-linear-gradient(
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.3) 3px,
+        rgba(0,0,0,0.3) 3px
+    );
+}
+
+body.upside-down #vhs-overlay {
+    background: repeating-linear-gradient(
+        transparent,
+        transparent 2px,
+        rgba(255,0,0,0.15) 3px,
+        rgba(255,0,0,0.15) 3px
+    );
+    opacity: 0.2;
+}
+
+/* Darker window headers for Upside Down */
+body.upside-down .window-header {
+    background: rgba(40, 0, 0, 0.8);
+    border-color: rgba(255, 0, 0, 0.3);
+}
+
+body.upside-down .glass-window {
+    border-color: rgba(255, 0, 0, 0.2);
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.15);
+}
+
+.glow-text-red {
+    text-shadow: 0 0 5px rgba(239, 68, 68, 0.6), 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.glow-text-yellow {
+    text-shadow: 0 0 5px rgba(250, 204, 21, 0.6), 0 0 10px rgba(250, 204, 21, 0.4);
+}
+
+.glow-text-cyan {
+    text-shadow: 0 0 5px rgba(34, 211, 238, 0.6), 0 0 10px rgba(34, 211, 238, 0.4);
+}
+
+.speaker-grille {
+    background-image: radial-gradient(circle, #000 2px, transparent 3px);
+    background-size: 12px 12px;
+    background-position: center;
+}
+
+/* --- Intro Animation --- */
+.intro-title {
+    animation: stranger-scale 5s ease-in-out forwards;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5), 0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+.intro-subtitle {
+    animation: fade-in-up 2s ease-out 2s forwards;
+}
+
+@keyframes stranger-scale {
+    0% {
+        transform: scale(1.5);
+        opacity: 0;
+        letter-spacing: -10px;
+    }
+    30% {
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+        letter-spacing: 5px;
+    }
+}
+
+@keyframes fade-in-up {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
